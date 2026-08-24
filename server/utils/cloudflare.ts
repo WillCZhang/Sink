@@ -8,8 +8,8 @@ export function useWAE(event: H3Event, query: Compilable) {
 
   const compiledQuery = compileAnalyticsQuery(query)
 
-  if (import.meta.dev)
-    console.info('useWAE', compiledQuery)
+  // if (import.meta.dev)
+  console.info('useWAE', compiledQuery)
 
   return $fetch(`https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/analytics_engine/sql`, {
     method: 'POST',
