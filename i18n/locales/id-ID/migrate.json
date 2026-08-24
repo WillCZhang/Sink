@@ -1,23 +1,5 @@
 {
   "migrate": {
-    "d1": {
-      "title": "Migrasi KV ke D1",
-      "description": "Salin data tautan dari Workers KV ke D1 tanpa mengganti data D1 yang ada.",
-      "status_title": "Status migrasi",
-      "status_pending": "Migrasi belum selesai.",
-      "status_completed": "Migrasi selesai.",
-      "completed_at": "Selesai {date}",
-      "run_again": "Jalankan lagi",
-      "running": "Memigrasikan…",
-      "success": "Migrasi berhasil diselesaikan.",
-      "failed": "Migrasi gagal",
-      "scanned": "Dipindai",
-      "inserted": "Ditambahkan",
-      "skipped": "Dilewati",
-      "expired": "Kedaluwarsa",
-      "failed_count": "Gagal",
-      "no_marker": "Penanda penyelesaian tidak ditemukan."
-    },
     "access_export": {
       "title": "Ekspor Data Akses",
       "description": "Unduh statistik akses sebagai file CSV",

@@ -9,18 +9,15 @@ import {
   d1CreateLinks,
   d1DeleteLink,
   d1GetActiveLink,
-  d1GetActiveLinkVersions,
   d1GetAnyLink,
   d1GetLinkWithMetadata,
-  d1HasActiveLinkVersion,
   d1IterateAllLinks,
   d1ListLinks,
   d1ListTags,
   d1SearchLinks,
   d1UpdateLink,
 } from '../services/link-store/d1'
-import { deleteLinkCache, isActiveLinkExpiration, putLinkCache, readLegacyKvLink } from '../services/link-store/kv'
-import { insertMigratedKvLink, readCompletedLinkMigrationMarker } from '../services/link-store/migration'
+import { deleteLinkCache, putLinkCache, readLegacyKvLink } from '../services/link-store/kv'
 
 export function normalizeSlug(event: H3Event, slug: string): string {
   const { caseSensitive } = useRuntimeConfig(event)
@@ -31,15 +28,14 @@ export function buildShortLink(event: H3Event, slug: string): string {
   return `${getRequestProtocol(event)}://${getRequestHost(event)}/${slug}`
 }
 
-async function writeThroughCache(event: H3Event, link: Link, effectiveExpiresAt?: number | null): Promise<void> {
-  if (!isActiveLinkExpiration(effectiveExpiresAt)) {
-    await deleteLinkCache(event, link.slug)
-    return
-  }
-  if (!await putLinkCache(event, link, effectiveExpiresAt))
-    return
-  if (!await d1HasActiveLinkVersion(event, link))
-    await deleteLinkCache(event, link.slug)
+// Schedules a best-effort KV cache operation outside the request path. D1 is the
+// authoritative store, so a failed or dropped cache write must never surface.
+function background(event: H3Event, promise: Promise<unknown>): void {
+  const ctx = event.context?.cloudflare?.context
+  if (ctx && typeof ctx.waitUntil === 'function')
+    ctx.waitUntil(promise)
+  else
+    promise.catch(() => {})
 }
 
 export async function getLink(event: H3Event, slug: string, cacheTtl?: number): Promise<Link | null> {
@@ -47,13 +43,10 @@ export async function getLink(event: H3Event, slug: string, cacheTtl?: number): 
   if (cached.link)
     return cached.link
 
-  if (!await readCompletedLinkMigrationMarker(event.context.cloudflare.env))
-    return null
-
   const stored = await d1GetActiveLink(event, slug)
   if (!stored)
     return null
-  await writeThroughCache(event, stored.link, stored.effectiveExpiresAt)
+  background(event, putLinkCache(event, stored.link, stored.effectiveExpiresAt))
   return stored.link
 }
 
@@ -73,31 +66,16 @@ export async function createLink(event: H3Event, link: Link): Promise<boolean> {
   const result = await d1CreateLink(event, link)
   if (!result.created)
     return false
-  await writeThroughCache(event, link, result.effectiveExpiresAt)
+  background(event, putLinkCache(event, link, result.effectiveExpiresAt))
   return true
 }
 
 export type CreateLinksResult = { created: boolean } | { error: unknown }
 
-async function writeThroughCaches(event: H3Event, links: { link: Link, effectiveExpiresAt: number | null }[]): Promise<void> {
-  const cached = (await Promise.all(links.map(async ({ link, effectiveExpiresAt }) => {
-    if (!isActiveLinkExpiration(effectiveExpiresAt)) {
-      await deleteLinkCache(event, link.slug)
-      return null
-    }
-    return await putLinkCache(event, link, effectiveExpiresAt) ? link : null
-  }))).filter(link => link !== null)
-  const currentSlugs = await d1GetActiveLinkVersions(event, cached)
-  await Promise.all(cached.map(async (link) => {
-    if (!currentSlugs.has(link.slug))
-      await deleteLinkCache(event, link.slug)
-  }))
-}
-
 export async function createLinks(event: H3Event, links: Link[]): Promise<CreateLinksResult[]> {
-  let results: Awaited<ReturnType<typeof d1CreateLinks>>
   try {
-    results = await d1CreateLinks(event, links)
+    const results = await d1CreateLinks(event, links)
+    return results.map(result => ({ created: result.created }))
   }
   catch {
     const fallbackResults: CreateLinksResult[] = []
@@ -111,38 +89,19 @@ export async function createLinks(event: H3Event, links: Link[]): Promise<Create
     }
     return fallbackResults
   }
-
-  const successful = results.flatMap((result, index) => result.created ? [{ link: links[index]!, effectiveExpiresAt: result.effectiveExpiresAt }] : [])
-  try {
-    await writeThroughCaches(event, successful)
-  }
-  catch (error) {
-    console.error({
-      event: 'link_cache.operation.failed',
-      operation: 'bulk-write-through',
-      slugs: successful.map(item => item.link.slug),
-      error: error instanceof Error ? error.message : String(error),
-    })
-    await Promise.all(successful.map(item => deleteLinkCache(event, item.link.slug)))
-  }
-  return results.map(result => ({ created: result.created }))
-}
-
-export async function migrateKvLink(event: H3Event, link: Link, effectiveExpiresAt?: number): Promise<boolean> {
-  return await insertMigratedKvLink(event, link, effectiveExpiresAt)
 }
 
 export async function updateLink(event: H3Event, link: Link, expected?: ExpectedLinkVersion): Promise<boolean> {
   const result = await d1UpdateLink(event, link, expected)
   if (!result.updated)
     return false
-  await writeThroughCache(event, link, result.effectiveExpiresAt)
+  background(event, deleteLinkCache(event, link.slug))
   return true
 }
 
 export async function deleteLink(event: H3Event, slug: string): Promise<void> {
   await d1DeleteLink(event, slug)
-  await deleteLinkCache(event, slug)
+  background(event, deleteLinkCache(event, slug))
 }
 
 export async function listLinks(event: H3Event, options: ListLinksOptions): Promise<ListLinksResult> {

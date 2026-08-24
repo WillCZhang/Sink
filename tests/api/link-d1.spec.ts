@@ -1,10 +1,9 @@
 import type { Link } from '../../shared/schemas/link'
-import type { LinkMigrationRunResult, LinkMigrationStatus } from '../../shared/schemas/link-migration'
 import { env } from 'cloudflare:workers'
-import { count, eq } from 'drizzle-orm'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { linkMigrationRuns, links, linkTags, linkTombstones, tags } from '../../server/database/schema'
-import { clearLinkMigrationState, db, deleteStoredLinks, fetch, fetchWithAuth, getD1Link, getStoredLink, postJson, putJson, setLinkStoreD1Mode } from '../utils'
+import { eq } from 'drizzle-orm'
+import { afterEach, describe, expect, it } from 'vitest'
+import { links, linkTombstones, tags } from '../../server/database/schema'
+import { db, deleteStoredLinks, fetch, fetchWithAuth, getD1Link, getStoredLink, postJson, putJson } from '../utils'
 
 const createdSlugs = new Set<string>()
 
@@ -51,30 +50,10 @@ async function insertD1Link(link: Link, effectiveExpiresAt: number | null = null
   })
 }
 
-async function runMigration(force: boolean) {
-  const pages: LinkMigrationRunResult[] = []
-  let cursor: string | undefined
-  do {
-    const response = await postJson('/api/link/migration/run', { force, cursor })
-    expect(response.status).toBe(200)
-    const page = await response.json() as LinkMigrationRunResult
-    pages.push(page)
-    cursor = page.cursor
-    if (page.completed)
-      break
-  } while (cursor)
-  return pages
-}
-
 describe('d1 link integration', () => {
-  beforeEach(async () => {
-    await setLinkStoreD1Mode()
-  })
-
   afterEach(async () => {
     await deleteStoredLinks([...createdSlugs])
     createdSlugs.clear()
-    await clearLinkMigrationState()
   })
 
   it('uses D1 for management queries and valid KV hits for redirects', async () => {
@@ -188,8 +167,7 @@ describe('d1 link integration', () => {
     expect(redirect.headers.get('Location')).toBe(expired.url)
   })
 
-  it('serves legacy KV redirects before migration without mutating storage', async () => {
-    await clearLinkMigrationState()
+  it('serves legacy KV redirects without writing to D1', async () => {
     const link = makeLink(undefined, { tags: ['legacy-tag'] })
     await putKvLink(link)
     const before = await env.KV.getWithMetadata(`link:${link.slug}`)
@@ -203,7 +181,6 @@ describe('d1 link integration', () => {
   })
 
   it('uses KV metadata expiration as an override and payload expiration as fallback', async () => {
-    await clearLinkMigrationState()
     const now = Math.floor(Date.now() / 1000)
     const metadataActive = makeLink(undefined, { expiration: now - 60 })
     const metadataExpired = makeLink(undefined, { expiration: now + 3600 })
@@ -224,47 +201,7 @@ describe('d1 link integration', () => {
     expect(await getStoredLink(payloadExpired.slug)).not.toBeNull()
   })
 
-  it('hides partial D1 rows and locks management APIs before migration', async () => {
-    await clearLinkMigrationState()
-    const link = makeLink()
-    await insertD1Link(link)
-    await env.KV.delete(`link:${link.slug}`)
-
-    expect((await fetch(`/${link.slug}`, { redirect: 'manual' })).status).toBe(404)
-    expect(await getStoredLink(link.slug)).toBeNull()
-    expect((await fetchWithAuth(`/api/link/query?slug=${link.slug}`)).status).toBe(423)
-    expect((await fetchWithAuth('/api/link/list')).status).toBe(423)
-    expect((await fetch(`/api/link/query?slug=${link.slug}`)).status).toBe(401)
-
-    const status = await fetchWithAuth('/api/link/migration/status')
-    expect(status.status).toBe(200)
-    expect(await status.json()).toEqual({ completed: false, marker: null })
-    expect((await postJson('/api/link/migration/run', { cursor: 'raw-cursor' })).status).toBe(400)
-  })
-
-  it('unlocks management APIs from a completed D1 run', async () => {
-    expect((await fetchWithAuth('/api/link/list')).status).toBe(200)
-    const status = await fetchWithAuth('/api/link/migration/status')
-    expect(status.status).toBe(200)
-    expect(await status.json()).toMatchObject({
-      completed: true,
-      marker: {
-        version: 1,
-        scanned: 0,
-        inserted: 0,
-        skipped: 0,
-        expired: 0,
-      },
-    })
-
-    const [before] = await db.select({ count: count() }).from(linkMigrationRuns)
-    const run = await postJson('/api/link/migration/run', {})
-    expect(await run.json()).toMatchObject({ completed: true, list_complete: true })
-    const [after] = await db.select({ count: count() }).from(linkMigrationRuns)
-    expect(after?.count).toBe(before?.count)
-  })
-
-  it('falls back to D1 for redirects when the completed D1 run has no KV cache', async () => {
+  it('falls back to D1 for redirects when KV has no cache', async () => {
     const link = makeLink()
     await insertD1Link(link)
     await env.KV.delete(`link:${link.slug}`)
@@ -273,23 +210,6 @@ describe('d1 link integration', () => {
     expect(redirect.status).toBe(301)
     expect(redirect.headers.get('Location')).toBe(link.url)
     expect(await getStoredLink(link.slug)).toMatchObject({ slug: link.slug, url: link.url })
-  })
-
-  it('writes legacy KV links to D1 only through explicit migration', async () => {
-    await clearLinkMigrationState()
-    const link = makeLink(undefined, { tags: ['legacy-tag'] })
-    await putKvLink(link)
-
-    expect((await fetch(`/${link.slug}`, { redirect: 'manual' })).status).toBe(301)
-    expect((await fetchWithAuth(`/api/link/query?slug=${link.slug}`)).status).toBe(423)
-    expect(await getD1Link(link.slug)).toBeNull()
-
-    await runMigration(false)
-
-    expect(await getD1Link(link.slug)).toMatchObject({ slug: link.slug, url: link.url })
-    const query = await fetchWithAuth(`/api/link/query?slug=${link.slug}`)
-    expect(query.status).toBe(200)
-    expect(await query.json()).toMatchObject({ tags: ['legacy-tag'] })
   })
 
   it('does not let a conflicting edit overwrite tags from the successful edit', async () => {
@@ -315,84 +235,7 @@ describe('d1 link integration', () => {
       expect(stored.tags).not.toEqual(edits[failedIndex]!.tags)
   })
 
-  it('does not apply stale KV tags when force migration skips an existing D1 link', async () => {
-    await clearLinkMigrationState()
-    const existingTag = `existing-${crypto.randomUUID().slice(0, 8)}`
-    const staleTag = `stale-${crypto.randomUUID().slice(0, 8)}`
-    const link = makeLink(undefined, { tags: [existingTag] })
-    await insertD1Link(link)
-    await db.batch([
-      db.insert(tags).values({ name: existingTag }),
-      db.insert(linkTags).values({ linkSlug: link.slug, tagName: existingTag }),
-    ])
-    await putKvLink({ ...link, tags: [staleTag] })
-
-    const pages = await runMigration(true)
-    expect(pages.reduce((sum, page) => sum + page.skipped, 0)).toBeGreaterThanOrEqual(1)
-    const stored = await (await fetchWithAuth(`/api/link/query?slug=${link.slug}`)).json() as Link
-    expect(stored.tags).toEqual([existingTag])
-    expect((await db.select({ name: tags.name }).from(tags).where(eq(tags.name, staleTag)).limit(1))[0] ?? null).toBeNull()
-    const tagList = await (await fetchWithAuth('/api/link/tags')).json() as { name: string, count: number }[]
-    expect(tagList.some(tag => tag.name === staleTag)).toBe(false)
-  })
-
-  it('protects migration endpoints and rejects raw or forged cursors', async () => {
-    await clearLinkMigrationState()
-    expect((await fetch('/api/link/migration/status')).status).toBe(401)
-    expect((await postJson('/api/link/migration/run', {}, false)).status).toBe(401)
-    expect((await postJson('/api/link/migration/run', { cursor: 'raw-cursor' })).status).toBe(400)
-    const forged = `migration:v1:${btoa(JSON.stringify({ runId: crypto.randomUUID() }))}`
-    expect((await postJson('/api/link/migration/run', { cursor: forged })).status).toBe(409)
-  })
-
-  it('paginates auto and force migrations, aggregates the completed run, and skips existing D1 rows', async () => {
-    await clearLinkMigrationState()
-    const prefix = `paged-${crypto.randomUUID()}-`
-    const links = Array.from({ length: 105 }, (_, index) => makeLink(`${prefix}${String(index).padStart(3, '0')}`))
-    await Promise.all(links.map(link => putKvLink(link)))
-    await insertD1Link(links[0]!)
-
-    const pages = await runMigration(false)
-    expect(pages.length).toBeGreaterThan(1)
-    expect(pages[0]?.scanned).toBeLessThanOrEqual(40)
-    const totals = pages.reduce((sum, page) => ({
-      scanned: sum.scanned + page.scanned,
-      inserted: sum.inserted + page.inserted,
-      skipped: sum.skipped + page.skipped,
-      expired: sum.expired + page.expired,
-    }), { scanned: 0, inserted: 0, skipped: 0, expired: 0 })
-    const status = await (await fetchWithAuth('/api/link/migration/status')).json() as LinkMigrationStatus
-    expect(status.marker).toMatchObject(totals)
-    expect(await getD1Link(links.at(-1)!.slug)).not.toBeNull()
-
-    const forced = await runMigration(true)
-    expect(forced.reduce((sum, page) => sum + page.inserted, 0)).toBe(0)
-    expect(forced.reduce((sum, page) => sum + page.skipped, 0)).toBeGreaterThanOrEqual(links.length)
-  }, 30_000)
-
-  it('does not restore a tombstoned link to D1 during migration', async () => {
-    const link = makeLink()
-    expect((await postJson('/api/link/create', { slug: link.slug, url: link.url })).status).toBe(201)
-    expect((await postJson('/api/link/delete', { slug: link.slug })).status).toBe(204)
-    await putKvLink(link)
-    await runMigration(true)
-
-    const redirect = await fetch(`/${link.slug}`, { redirect: 'manual' })
-    expect(redirect.status).toBe(301)
-    expect(redirect.headers.get('Location')).toBe(link.url)
-    expect(await getStoredLink(link.slug)).toMatchObject({ slug: link.slug })
-    expect(await getD1Link(link.slug)).toBeNull()
-    expect((await db.select({ slug: linkTombstones.slug }).from(linkTombstones).where(eq(linkTombstones.slug, link.slug)).limit(1))[0] ?? null).not.toBeNull()
-  })
-
-  it('counts expired KV migration entries and imports expired links', async () => {
-    await clearLinkMigrationState()
-    const expired = makeLink(undefined, { expiration: Math.floor(Date.now() / 1000) - 60 })
-    await putKvLink(expired)
-    const pages = await runMigration(true)
-    expect(pages.reduce((sum, page) => sum + page.expired, 0)).toBeGreaterThanOrEqual(1)
-    expect(await getD1Link(expired.slug)).toBeNull()
-
+  it('imports expired links without caching to KV', async () => {
     const imported = makeLink(undefined, { expiration: Math.floor(Date.now() / 1000) - 60 })
     const response = await postJson('/api/link/import', { version: '1.0', links: [imported] })
     expect(response.status).toBe(200)
@@ -421,17 +264,6 @@ describe('d1 link integration', () => {
     expect(activeList.links).toEqual([])
     expect((await fetch(`/${link.slug}`, { redirect: 'manual' })).status).toBe(404)
     expect(await getStoredLink(link.slug)).toBeNull()
-  })
-
-  it('preserves native KV expiration when migrating to D1', async () => {
-    await clearLinkMigrationState()
-    const link = makeLink()
-    const nativeExpiration = Math.floor(Date.now() / 1000) + 3600
-    await putKvLink(link, { nativeExpiration })
-
-    await runMigration(true)
-
-    expect(await getD1Link(link.slug)).toMatchObject({ effectiveExpiresAt: nativeExpiration })
   })
 
   it('replaces expired rows during import without overwriting active rows', async () => {
@@ -490,60 +322,12 @@ describe('d1 link integration', () => {
     expect((await db.select({ slug: linkTombstones.slug }).from(linkTombstones).where(eq(linkTombstones.slug, link.slug)).limit(1))[0] ?? null).toBeNull()
   })
 
-  it('removes a failed migration run without recording completion', async () => {
-    await clearLinkMigrationState()
-    const invalidKey = `link:invalid-${crypto.randomUUID()}`
-    await env.KV.put(invalidKey, JSON.stringify({ invalid: true }))
-
-    let cursor: string | undefined
-    let result: LinkMigrationRunResult
-    do {
-      const response = await postJson('/api/link/migration/run', { force: true, cursor })
-      result = await response.json() as LinkMigrationRunResult
-      cursor = result.cursor
-    } while (result.failed === 0 && cursor)
-
-    expect(result.failed).toBeGreaterThanOrEqual(1)
-    expect(result.cursor).toBeUndefined()
-    expect((await db.select({ id: linkMigrationRuns.id }).from(linkMigrationRuns).limit(1))[0] ?? null).toBeNull()
-
-    await env.KV.delete(invalidKey)
-    const retry = await runMigration(true)
-    expect(retry.at(-1)?.completed).toBe(true)
-  })
-
-  it('serves and force-migrates legacy KV links missing stored fields', async () => {
-    await clearLinkMigrationState()
-    const publicSlug = trackSlug(`legacy-public-${crypto.randomUUID()}`)
-    const migrationSlug = trackSlug(`legacy-force-${crypto.randomUUID()}`)
-    await env.KV.put(`link:${publicSlug}`, JSON.stringify({ url: 'https://example.com/public', tags: [] }))
-    await env.KV.put(`link:${migrationSlug}`, JSON.stringify({ id: '  ', url: 'https://example.com/force', createdAt: '', updatedAt: null, tags: [] }))
-
-    const redirect = await fetch(`/${publicSlug}`, { redirect: 'manual' })
-    expect(redirect.status).toBe(301)
-    expect(redirect.headers.get('Location')).toBe('https://example.com/public')
-    expect(await getD1Link(publicSlug)).toBeNull()
-
-    const pages = await runMigration(true)
-    expect(pages.reduce((sum, page) => sum + page.failed, 0)).toBe(0)
-    expect(await getD1Link(publicSlug)).toMatchObject({ slug: publicSlug, url: 'https://example.com/public' })
-    const migrated = await getD1Link(migrationSlug)
-    expect(migrated).toMatchObject({ slug: migrationSlug, url: 'https://example.com/force' })
-    expect(migrated?.id).not.toBe('')
-    expect(migrated?.createdAt).toEqual(expect.any(Number))
-    expect(migrated?.updatedAt).toEqual(expect.any(Number))
-  })
-
   it('keeps malformed legacy KV data when compatibility parsing fails', async () => {
-    await clearLinkMigrationState()
     const slug = trackSlug(`malformed-legacy-${crypto.randomUUID()}`)
     await env.KV.put(`link:${slug}`, JSON.stringify({ url: 'not-a-url', tags: [] }))
 
     expect((await fetch(`/${slug}`, { redirect: 'manual' })).status).toBe(404)
     expect(await env.KV.get(`link:${slug}`)).not.toBeNull()
-    const response = await postJson('/api/link/migration/run', { force: true })
-    const result = await response.json() as LinkMigrationRunResult
-    expect(result.failed).toBeGreaterThanOrEqual(1)
   })
 
   it('supports all D1 sorts and stable keyset pagination', async () => {
@@ -668,29 +452,4 @@ describe('d1 link integration', () => {
     expect((await fetch(`/${expired.slug}`, { redirect: 'manual' })).status).toBe(404)
     expect(await getStoredLink(expired.slug)).toBeNull()
   })
-
-  it('binds a continuation cursor to the original force mode even after a completed run appears', async () => {
-    await clearLinkMigrationState()
-    const prefix = `mode-${crypto.randomUUID()}-`
-    await Promise.all(Array.from({ length: 101 }, (_, index) => putKvLink(makeLink(`${prefix}${index}`))))
-    const firstResponse = await postJson('/api/link/migration/run', { force: true })
-    const first = await firstResponse.json() as LinkMigrationRunResult
-    expect(first.cursor).toBeDefined()
-    const now = Math.floor(Date.now() / 1000)
-    await db.insert(linkMigrationRuns).values({
-      id: `test-concurrent-completed-${crypto.randomUUID()}`,
-      expectedCursor: null,
-      scanned: 0,
-      inserted: 0,
-      skipped: 0,
-      expired: 0,
-      force: false,
-      status: 'completed',
-      createdAt: now,
-      updatedAt: now,
-    })
-
-    expect((await postJson('/api/link/migration/run', { cursor: first.cursor, force: false })).status).toBe(400)
-    expect((await postJson('/api/link/migration/run', { cursor: first.cursor, force: true })).status).toBe(200)
-  }, 20_000)
 })

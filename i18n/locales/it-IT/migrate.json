@@ -1,23 +1,5 @@
 {
   "migrate": {
-    "d1": {
-      "title": "Migrazione da KV a D1",
-      "description": "Copia i link da Workers KV a D1 mantenendo i record D1 esistenti.",
-      "status_title": "Stato migrazione",
-      "status_pending": "La migrazione non è completata.",
-      "status_completed": "Migrazione completata.",
-      "completed_at": "Completata il {date}",
-      "run_again": "Esegui di nuovo",
-      "running": "Migrazione…",
-      "success": "Migrazione completata con successo.",
-      "failed": "Migrazione non riuscita",
-      "scanned": "Analizzati",
-      "inserted": "Inseriti",
-      "skipped": "Ignorati",
-      "expired": "Scaduti",
-      "failed_count": "Non riusciti",
-      "no_marker": "Nessun indicatore di completamento trovato."
-    },
     "access_export": {
       "title": "Esporta dati di accesso",
       "description": "Scarica le statistiche di accesso come file CSV",

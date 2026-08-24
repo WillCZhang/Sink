@@ -1,13 +1,9 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { deleteStoredLinks, fetch, postJson, setLinkStoreD1Mode } from './utils'
+import { afterAll, describe, expect, it } from 'vitest'
+import { deleteStoredLinks, fetch, postJson } from './utils'
 
 type CfRequestInit = RequestInit & { cf?: { country?: string } }
 
 const createdSlugs: string[] = []
-
-beforeAll(async () => {
-  await setLinkStoreD1Mode()
-})
 
 afterAll(async () => {
   await deleteStoredLinks(createdSlugs)

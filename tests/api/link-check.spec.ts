@@ -1,13 +1,9 @@
 import type { LinkCheckResponse } from '../../shared/types/link-check'
 import { env } from 'cloudflare:workers'
 import { eq } from 'drizzle-orm'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { links } from '../../server/database/schema'
-import { db, deleteStoredLinks, postJson, setLinkStoreD1Mode } from '../utils'
-
-beforeEach(async () => {
-  await setLinkStoreD1Mode()
-})
+import { db, deleteStoredLinks, postJson } from '../utils'
 
 function uniqueSlug(index: number): string {
   return `link-check-${index}-${crypto.randomUUID()}`

@@ -1,12 +1,8 @@
 import { env } from 'cloudflare:workers'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { deleteStoredLinks, expectMaskedPassword, expectStoredHashedPassword, fetch, fetchWithAuth, getStoredLink, postJson, putJson, setLinkStoreD1Mode } from '../utils'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { deleteStoredLinks, expectMaskedPassword, expectStoredHashedPassword, fetch, fetchWithAuth, getStoredLink, postJson, putJson } from '../utils'
 
 const createdSlugs = new Set<string>()
-
-beforeEach(async () => {
-  await setLinkStoreD1Mode()
-})
 
 function trackSlug(slug: string) {
   createdSlugs.add(slug)

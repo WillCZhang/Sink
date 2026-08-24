@@ -1,12 +1,8 @@
 import type { BatchCreateResult } from '#shared/types/link'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { deleteStoredLinks, fetch, getD1Link, postJson, setLinkStoreD1Mode } from '../utils'
+import { afterEach, describe, expect, it } from 'vitest'
+import { deleteStoredLinks, fetch, getD1Link, postJson } from '../utils'
 
 const createdSlugs = new Set<string>()
-
-beforeEach(async () => {
-  await setLinkStoreD1Mode()
-})
 
 afterEach(async () => {
   await deleteStoredLinks([...createdSlugs])

@@ -18,7 +18,7 @@
       "enabled": true
     },
     "traces": {
-      "enabled": true
+      "enabled": false
     }
   },
   "ai": {

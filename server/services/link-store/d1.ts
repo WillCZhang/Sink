@@ -183,27 +183,6 @@ export async function d1GetLinkWithMetadata(event: H3Event, slug: string): Promi
   }
 }
 
-export async function d1HasActiveLinkVersion(event: H3Event, link: Link): Promise<boolean> {
-  const rows = await getDatabase(event).select({ id: links.id }).from(links).where(and(
-    eq(links.slug, link.slug),
-    eq(links.id, link.id),
-    eq(links.updatedAt, link.updatedAt),
-    activeCondition(),
-  )).limit(1)
-  return rows.length > 0
-}
-
-export async function d1GetActiveLinkVersions(event: H3Event, expectedLinks: Link[]): Promise<Set<string>> {
-  if (!expectedLinks.length)
-    return new Set()
-
-  const rows = await getDatabase(event).select({ slug: links.slug }).from(links).where(and(
-    activeCondition(),
-    or(...expectedLinks.map(link => and(eq(links.slug, link.slug), eq(links.id, link.id), eq(links.updatedAt, link.updatedAt)))),
-  ))
-  return new Set(rows.map(row => row.slug))
-}
-
 export async function d1CreateLink(event: H3Event, link: Link): Promise<{ created: boolean, effectiveExpiresAt: number | null }> {
   const db = getDatabase(event)
   const { statements, effectiveExpiresAt } = buildCreateLinkStatements(event, db, link)

@@ -1,0 +1,1 @@
+DROP TABLE `link_migration_runs`;

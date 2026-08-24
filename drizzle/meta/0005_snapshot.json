@@ -1,105 +1,9 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "11db33bb-f67f-4ad5-8d56-327ab58540db",
-  "prevId": "e91628ec-3af5-43d4-82ac-8a45e1c6b4ca",
+  "id": "110d58ad-ddf3-4b74-8a0a-5524b4696c65",
+  "prevId": "11db33bb-f67f-4ad5-8d56-327ab58540db",
   "tables": {
-    "link_migration_runs": {
-      "name": "link_migration_runs",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "expected_cursor": {
-          "name": "expected_cursor",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "scanned": {
-          "name": "scanned",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "inserted": {
-          "name": "inserted",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "skipped": {
-          "name": "skipped",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "expired": {
-          "name": "expired",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "force": {
-          "name": "force",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'running'"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "link_migration_runs_status_updated_at_desc_created_at_desc_id_desc_idx": {
-          "name": "link_migration_runs_status_updated_at_desc_created_at_desc_id_desc_idx",
-          "columns": [
-            "status",
-            "\"updated_at\" desc",
-            "\"created_at\" desc",
-            "\"id\" desc"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
     "link_tags": {
       "name": "link_tags",
       "columns": {
@@ -393,19 +297,6 @@
   },
   "internal": {
     "indexes": {
-      "link_migration_runs_status_updated_at_desc_created_at_desc_id_desc_idx": {
-        "columns": {
-          "\"updated_at\" desc": {
-            "isExpression": true
-          },
-          "\"created_at\" desc": {
-            "isExpression": true
-          },
-          "\"id\" desc": {
-            "isExpression": true
-          }
-        }
-      },
       "links_created_at_desc_slug_idx": {
         "columns": {
           "\"created_at\" desc": {

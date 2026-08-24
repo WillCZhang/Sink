@@ -3,7 +3,7 @@ import { env, exports } from 'cloudflare:workers'
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/d1'
 import { expect } from 'vitest'
-import { linkMigrationRuns, links, linkTombstones } from '../server/database/schema'
+import { links, linkTombstones } from '../server/database/schema'
 import { LINK_PASSWORD_HASH_PREFIX, LINK_PASSWORD_MASK_PREFIX } from '../shared/utils/link-password'
 
 export const db = drizzle(env.DB)
@@ -60,27 +60,6 @@ export async function deleteStoredLink(slug: string) {
 
 export async function deleteStoredLinks(slugs: string[]) {
   await Promise.all(slugs.map(slug => deleteStoredLink(slug)))
-}
-
-export async function clearLinkMigrationState() {
-  await db.delete(linkMigrationRuns)
-}
-
-export async function setLinkStoreD1Mode() {
-  await clearLinkMigrationState()
-  const now = Math.floor(Date.now() / 1000)
-  await db.insert(linkMigrationRuns).values({
-    id: `test-completed-${crypto.randomUUID()}`,
-    expectedCursor: null,
-    scanned: 0,
-    inserted: 0,
-    skipped: 0,
-    expired: 0,
-    force: false,
-    status: 'completed',
-    createdAt: now,
-    updatedAt: now,
-  })
 }
 
 export function expectMaskedPassword(password: string | undefined, plainText: string) {

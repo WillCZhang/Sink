@@ -12,9 +12,9 @@ function isActiveExpiration(expiration: number | null | undefined): boolean {
   return expiration === null || expiration === undefined || expiration > Math.floor(Date.now() / 1000)
 }
 
-function logCacheError(operation: string, slug: string, error: unknown): void {
-  console.error({
-    event: 'link_cache.operation.failed',
+function logCacheWarning(operation: string, slug: string, error: unknown): void {
+  console.warn({
+    event: 'link_cache.operation.warned',
     operation,
     slug,
     error: error instanceof Error ? error.message : String(error),
@@ -44,7 +44,7 @@ export async function putLinkCache(event: H3Event, link: Link, effectiveExpiresA
     return true
   }
   catch (error) {
-    logCacheError('put', link.slug, error)
+    logCacheWarning('put', link.slug, error)
     return false
   }
 }
@@ -54,10 +54,6 @@ export async function deleteLinkCache(event: H3Event, slug: string): Promise<voi
     await event.context.cloudflare.env.KV.delete(`link:${slug}`)
   }
   catch (error) {
-    logCacheError('delete', slug, error)
+    logCacheWarning('delete', slug, error)
   }
-}
-
-export function isActiveLinkExpiration(expiration: number | null | undefined): boolean {
-  return isActiveExpiration(expiration)
 }
