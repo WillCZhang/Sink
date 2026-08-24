@@ -3,27 +3,6 @@ import { IMAGE_ALLOWED_TYPES, IMAGE_MAX_SIZE } from '#shared/utils/image'
 
 const slugValidator = SlugSchema
 
-defineRouteMeta({
-  openAPI: {
-    description: 'Upload an image to R2 storage',
-    requestBody: {
-      required: true,
-      content: {
-        'multipart/form-data': {
-          schema: {
-            type: 'object',
-            required: ['file', 'slug'],
-            properties: {
-              file: { type: 'string', format: 'binary' },
-              slug: { type: 'string' },
-            },
-          },
-        },
-      },
-    },
-  },
-})
-
 export default eventHandler(async (event) => {
   const R2 = requireR2Bucket(event.context.cloudflare.env)
 

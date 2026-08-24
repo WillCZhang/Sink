@@ -4,28 +4,6 @@ import { ofetch } from 'ofetch'
 import { LinkCheckRequestSchema } from '#shared/schemas/link-check'
 import { toErrorMessage } from '#shared/utils/error'
 
-defineRouteMeta({
-  openAPI: {
-    description: 'Check target URLs for existing short links',
-    security: [{ bearerAuth: [] }],
-    requestBody: {
-      required: true,
-      content: {
-        'application/json': {
-          schema: {
-            type: 'object',
-            properties: {
-              cursor: { type: 'string', description: 'Pagination cursor from the previous response' },
-              limit: { type: 'integer', default: 6, minimum: 1, maximum: 10, description: 'Maximum number of links to check' },
-              timeout: { type: 'integer', default: 6, minimum: 1, maximum: 30, description: 'Timeout in seconds for each link' },
-            },
-          },
-        },
-      },
-    },
-  },
-})
-
 const SAFE_FORWARDED_HEADERS = ['accept-language', 'user-agent'] as const
 
 function getSafeHeaders(event: H3Event): Headers {

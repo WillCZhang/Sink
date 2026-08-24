@@ -1,31 +1,6 @@
 import type { BatchCreateResult } from '#shared/types/link'
 import { BatchCreateLinksSchema, CreateLinkSchema, nanoid } from '#shared/schemas/link'
 
-defineRouteMeta({
-  openAPI: {
-    description: 'Create multiple short links in bulk from a list of URLs',
-    security: [{ bearerAuth: [] }],
-    requestBody: {
-      required: true,
-      content: {
-        'application/json': {
-          schema: {
-            type: 'object',
-            required: ['urls'],
-            properties: {
-              urls: {
-                type: 'array',
-                description: 'Target URLs. A random slug is generated for each.',
-                items: { type: 'string' },
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-})
-
 // D1 batches are bounded, so write in small chunks like the import flow.
 const chunkSize = 4
 // Random slugs essentially never collide; retry a few times for correctness.

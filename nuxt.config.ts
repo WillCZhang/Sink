@@ -55,9 +55,6 @@ export default defineNuxtConfig({
     '/api/**': {
       cors: process.env.NUXT_API_CORS === 'true',
     },
-    '/_docs/**': {
-      headers: { 'X-Robots-Tag': 'noindex, follow' },
-    },
     '/sphere.bin': {
       headers: { 'Cache-Control': 'public, max-age=0, must-revalidate' },
     },
@@ -81,26 +78,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-07-13',
   nitro: {
     preset: import.meta.env.CF_PAGES !== '1' ? 'cloudflare-module' : undefined,
-    experimental: {
-      openAPI: true,
-    },
     timing: true,
-    openAPI: {
-      production: 'runtime',
-      meta: {
-        title: 'Sink API',
-        description: 'A Simple / Speedy / Secure Link Shortener with Analytics, 100% run on Cloudflare.\n\n[Return to this Sink instance](/) · [Read the documentation](https://docs.sink.cool)',
-      },
-      route: '/_docs/openapi.json',
-      ui: {
-        scalar: {
-          route: '/_docs/scalar',
-        },
-        swagger: {
-          route: '/_docs/swagger',
-        },
-      },
-    },
   },
   vite: {
     plugins: [
