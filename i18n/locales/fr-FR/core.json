@@ -11,9 +11,7 @@
     "edit": "Modifier",
     "delete": "Supprimer",
     "delete_success": "Suppression réussie !",
-    "search": "Rechercher",
-    "not_found": "Page introuvable",
-    "not_found_description": "Désolé, la page que vous recherchez n'existe pas."
+    "search": "Rechercher"
   },
   "theme": {
     "toggle": "Changer de thème",

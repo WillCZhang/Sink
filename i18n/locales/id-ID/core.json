@@ -11,9 +11,7 @@
     "edit": "Edit",
     "delete": "Hapus",
     "delete_success": "Berhasil dihapus!",
-    "search": "Cari",
-    "not_found": "Halaman tidak ditemukan",
-    "not_found_description": "Maaf, halaman yang Anda cari tidak ada."
+    "search": "Cari"
   },
   "theme": {
     "toggle": "Ganti tema",

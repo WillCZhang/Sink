@@ -20,10 +20,10 @@ import errorImage from './assets/images/404.svg?raw'
 
     <div class="flex flex-col items-center gap-2 text-center">
       <h1 class="text-2xl font-medium">
-        {{ $t('common.not_found') }}
+        Page not found
       </h1>
       <p class="max-w-sm text-pretty text-muted-foreground">
-        {{ $t('common.not_found_description') }}
+        Sorry, the page you're looking for doesn't exist.
       </p>
     </div>
   </div>
