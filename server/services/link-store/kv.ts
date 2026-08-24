@@ -13,11 +13,12 @@ function isActiveExpiration(expiration: number | null | undefined): boolean {
 }
 
 function logCacheWarning(operation: string, slug: string, error: unknown): void {
-  console.warn({
+  const msg = error instanceof Error ? error.message : String(error)
+  console.warn(msg, {
     event: 'link_cache.operation.warned',
     operation,
     slug,
-    error: error instanceof Error ? error.message : String(error),
+    error: msg,
   })
 }
 
