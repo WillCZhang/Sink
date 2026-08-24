@@ -10,6 +10,23 @@
     },
     "create": "링크 생성",
     "edit": "링크 편집",
+    "batch_create": {
+      "title": "일괄 링크 생성",
+      "description": "URL 목록을 한 줄에 하나씩 붙여 넣으세요. 각 URL에는 임의의 짧은 링크가 생성됩니다.",
+      "textarea_label": "URL",
+      "textarea_placeholder": "https://example.com\nhttps://example.org",
+      "submit": "생성",
+      "creating": "생성 중…",
+      "empty": "URL을 하나 이상 입력하세요.",
+      "invalid_lines_title": "{count}개의 잘못된 줄이 있습니다.",
+      "line_label": "{line}번째 줄",
+      "request_failed": "링크 생성에 실패했습니다.",
+      "result": {
+        "success_title": "{count}개 링크 생성됨",
+        "failed_title": "{count}개 실패",
+        "copy": "링크 복사"
+      }
+    },
     "delete_success": "삭제되었습니다!",
     "delete_failed": "삭제에 실패했습니다!",
     "update_success": "링크가 성공적으로 업데이트되었습니다",

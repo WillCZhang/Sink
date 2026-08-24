@@ -10,6 +10,23 @@
     },
     "create": "Créer un lien",
     "edit": "Modifier le lien",
+    "batch_create": {
+      "title": "Créer des liens en lot",
+      "description": "Collez une liste d’URL, une par ligne. Chaque URL reçoit un lien court généré aléatoirement.",
+      "textarea_label": "URLs",
+      "textarea_placeholder": "https://example.com\nhttps://example.org",
+      "submit": "Créer",
+      "creating": "Création…",
+      "empty": "Saisissez au moins une URL.",
+      "invalid_lines_title": "{count} ligne(s) invalide(s).",
+      "line_label": "Ligne {line}",
+      "request_failed": "Échec de la création des liens.",
+      "result": {
+        "success_title": "{count} liens créés",
+        "failed_title": "{count} échec(s)",
+        "copy": "Copier le lien"
+      }
+    },
     "delete_success": "Suppression réussie !",
     "delete_failed": "Échec de la suppression !",
     "update_success": "Lien mis à jour avec succès",

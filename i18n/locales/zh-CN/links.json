@@ -10,6 +10,23 @@
     },
     "create": "创建链接",
     "edit": "编辑链接",
+    "batch_create": {
+      "title": "批量创建链接",
+      "description": "粘贴链接列表，每行一个，每个链接都会随机生成一条短链。",
+      "textarea_label": "链接列表",
+      "textarea_placeholder": "https://example.com\nhttps://example.org",
+      "submit": "创建",
+      "creating": "创建中…",
+      "empty": "请输入至少一个链接。",
+      "invalid_lines_title": "有 {count} 行无效链接。",
+      "line_label": "第 {line} 行",
+      "request_failed": "批量创建失败。",
+      "result": {
+        "success_title": "已创建 {count} 条链接",
+        "failed_title": "{count} 条创建失败",
+        "copy": "复制链接"
+      }
+    },
     "delete_success": "删除成功！",
     "delete_failed": "删除失败！",
     "update_success": "链接更新成功",

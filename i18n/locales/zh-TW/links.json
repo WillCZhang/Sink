@@ -10,6 +10,23 @@
     },
     "create": "創建連結",
     "edit": "編輯連結",
+    "batch_create": {
+      "title": "批次建立連結",
+      "description": "貼上連結清單，每行一個，每個連結都會隨機產生一組短連結。",
+      "textarea_label": "連結清單",
+      "textarea_placeholder": "https://example.com\nhttps://example.org",
+      "submit": "建立",
+      "creating": "建立中…",
+      "empty": "請輸入至少一個連結。",
+      "invalid_lines_title": "有 {count} 行無效連結。",
+      "line_label": "第 {line} 行",
+      "request_failed": "批次建立失敗。",
+      "result": {
+        "success_title": "已建立 {count} 個連結",
+        "failed_title": "{count} 個建立失敗",
+        "copy": "複製連結"
+      }
+    },
     "delete_success": "刪除成功！",
     "delete_failed": "刪除失敗！",
     "update_success": "連結更新成功",

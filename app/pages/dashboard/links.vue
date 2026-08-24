@@ -22,6 +22,7 @@ onMounted(() => {
       </h1>
       <Teleport to="#dashboard-header-actions" defer>
         <DashboardLinksSearchDialog />
+        <DashboardLinksBatchModal />
         <DashboardLinksEditorModal />
       </Teleport>
 

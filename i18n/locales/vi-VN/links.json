@@ -10,6 +10,23 @@
     },
     "create": "Tạo liên kết",
     "edit": "Chỉnh sửa liên kết",
+    "batch_create": {
+      "title": "Tạo nhiều liên kết",
+      "description": "Dán danh sách URL, mỗi dòng một URL. Mỗi URL sẽ nhận một liên kết ngắn được tạo ngẫu nhiên.",
+      "textarea_label": "URL",
+      "textarea_placeholder": "https://example.com\nhttps://example.org",
+      "submit": "Tạo",
+      "creating": "Đang tạo…",
+      "empty": "Nhập ít nhất một URL.",
+      "invalid_lines_title": "{count} dòng không hợp lệ.",
+      "line_label": "Dòng {line}",
+      "request_failed": "Tạo liên kết thất bại.",
+      "result": {
+        "success_title": "Đã tạo {count} liên kết",
+        "failed_title": "{count} thất bại",
+        "copy": "Sao chép liên kết"
+      }
+    },
     "delete_success": "Xóa thành công!",
     "delete_failed": "Xóa thất bại!",
     "update_success": "Cập nhật liên kết thành công",

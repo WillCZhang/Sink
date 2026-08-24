@@ -10,6 +10,23 @@
     },
     "create": "Create Link",
     "edit": "Edit Link",
+    "batch_create": {
+      "title": "Batch Create Links",
+      "description": "Paste a list of URLs, one per line. Each URL gets a randomly generated short link.",
+      "textarea_label": "URLs",
+      "textarea_placeholder": "https://example.com\nhttps://example.org",
+      "submit": "Create",
+      "creating": "Creating…",
+      "empty": "Enter at least one URL.",
+      "invalid_lines_title": "{count} invalid line(s).",
+      "line_label": "Line {line}",
+      "request_failed": "Failed to create links.",
+      "result": {
+        "success_title": "Created {count} links",
+        "failed_title": "{count} failed",
+        "copy": "Copy link"
+      }
+    },
     "delete_success": "Link deleted",
     "delete_failed": "Failed to delete link.",
     "update_success": "Link updated",

@@ -10,6 +10,23 @@
     },
     "create": "Buat Tautan",
     "edit": "Edit Tautan",
+    "batch_create": {
+      "title": "Buat Banyak Tautan",
+      "description": "Tempel daftar URL, satu per baris. Setiap URL mendapatkan tautan pendek yang dibuat acak.",
+      "textarea_label": "URL",
+      "textarea_placeholder": "https://example.com\nhttps://example.org",
+      "submit": "Buat",
+      "creating": "Membuat…",
+      "empty": "Masukkan setidaknya satu URL.",
+      "invalid_lines_title": "{count} baris tidak valid.",
+      "line_label": "Baris {line}",
+      "request_failed": "Gagal membuat tautan.",
+      "result": {
+        "success_title": "{count} tautan dibuat",
+        "failed_title": "{count} gagal",
+        "copy": "Salin tautan"
+      }
+    },
     "delete_success": "Berhasil dihapus!",
     "delete_failed": "Gagal menghapus!",
     "update_success": "Tautan berhasil diperbarui",

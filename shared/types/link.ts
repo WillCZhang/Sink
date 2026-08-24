@@ -6,6 +6,18 @@ export type { Link }
 
 export type LinkUpdateType = 'create' | 'edit' | 'delete'
 
+export interface BatchCreateLinkItem {
+  link: Link
+  shortLink: string
+}
+
+export interface BatchCreateResult {
+  success: number
+  failed: number
+  successItems: BatchCreateLinkItem[]
+  failedItems: { url: string, reason: string }[]
+}
+
 export interface LinkSearchItem {
   slug: string
   url: string

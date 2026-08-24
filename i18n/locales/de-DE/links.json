@@ -10,6 +10,23 @@
     },
     "create": "Link erstellen",
     "edit": "Link bearbeiten",
+    "batch_create": {
+      "title": "Links im Stapel erstellen",
+      "description": "Fügen Sie eine Liste von URLs ein, eine pro Zeile. Jede URL erhält einen zufällig generierten Kurzlink.",
+      "textarea_label": "URLs",
+      "textarea_placeholder": "https://example.com\nhttps://example.org",
+      "submit": "Erstellen",
+      "creating": "Wird erstellt…",
+      "empty": "Geben Sie mindestens eine URL ein.",
+      "invalid_lines_title": "{count} ungültige Zeile(n).",
+      "line_label": "Zeile {line}",
+      "request_failed": "Erstellen der Links fehlgeschlagen.",
+      "result": {
+        "success_title": "{count} Links erstellt",
+        "failed_title": "{count} fehlgeschlagen",
+        "copy": "Link kopieren"
+      }
+    },
     "delete_success": "Erfolgreich gelöscht!",
     "delete_failed": "Löschen fehlgeschlagen!",
     "update_success": "Link erfolgreich aktualisiert",

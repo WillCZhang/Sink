@@ -10,6 +10,23 @@
     },
     "create": "Crea Link",
     "edit": "Modifica Link",
+    "batch_create": {
+      "title": "Crea link in blocco",
+      "description": "Incolla un elenco di URL, uno per riga. Ogni URL riceve un link breve generato casualmente.",
+      "textarea_label": "URL",
+      "textarea_placeholder": "https://example.com\nhttps://example.org",
+      "submit": "Crea",
+      "creating": "Creazione…",
+      "empty": "Inserisci almeno un URL.",
+      "invalid_lines_title": "{count} righe non valide.",
+      "line_label": "Riga {line}",
+      "request_failed": "Creazione dei link non riuscita.",
+      "result": {
+        "success_title": "{count} link creati",
+        "failed_title": "{count} non riusciti",
+        "copy": "Copia link"
+      }
+    },
     "delete_success": "Eliminazione riuscita!",
     "delete_failed": "Eliminazione fallita!",
     "update_success": "Link aggiornato con successo",

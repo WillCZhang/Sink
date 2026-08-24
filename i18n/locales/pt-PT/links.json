@@ -10,6 +10,23 @@
     },
     "create": "Criar link",
     "edit": "Editar link",
+    "batch_create": {
+      "title": "Criar links em lote",
+      "description": "Cole uma lista de URLs, uma por linha. Cada URL recebe um link curto gerado aleatoriamente.",
+      "textarea_label": "URLs",
+      "textarea_placeholder": "https://example.com\nhttps://example.org",
+      "submit": "Criar",
+      "creating": "A criar…",
+      "empty": "Introduza pelo menos um URL.",
+      "invalid_lines_title": "{count} linha(s) inválida(s).",
+      "line_label": "Linha {line}",
+      "request_failed": "Falha ao criar os links.",
+      "result": {
+        "success_title": "{count} links criados",
+        "failed_title": "{count} falhados",
+        "copy": "Copiar link"
+      }
+    },
     "delete_success": "Eliminado com sucesso!",
     "delete_failed": "Falha ao eliminar!",
     "update_success": "Link atualizado com sucesso",

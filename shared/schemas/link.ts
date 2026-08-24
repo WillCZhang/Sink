@@ -71,6 +71,12 @@ export const EditLinkSchema = LinkFieldsSchema.extend({
   password: EditLinkPasswordSchema,
 })
 
+export const BatchCreateLinksSchema = z.object({
+  urls: z.array(UrlSchema).min(1),
+})
+
+export type BatchCreateLinks = z.infer<typeof BatchCreateLinksSchema>
+
 export const ImportLinkSchema = LinkFieldsSchema.extend({
   id: z.preprocess(value => typeof value === 'string' && !value.trim() ? undefined : value, IdSchema.optional()),
   createdAt: TimestampSchema.optional(),
