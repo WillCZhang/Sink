@@ -26,12 +26,6 @@ import errorImage from './assets/images/404.svg?raw'
         {{ $t('common.not_found_description') }}
       </p>
     </div>
-
-    <Button as-child>
-      <NuxtLink to="/dashboard">
-        {{ $t('dashboard.title') }}
-      </NuxtLink>
-    </Button>
   </div>
 </template>
 
