@@ -87,4 +87,7 @@ else {
   config.r2_buckets = config.r2_buckets.filter(({ binding }) => binding !== 'R2')
 }
 
+// disable exposing worker domain
+config.workers_dev = false
+
 await writeFile(outputPath, `${JSON.stringify(config, null, 2)}\n`, 'utf8')
