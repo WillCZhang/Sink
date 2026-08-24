@@ -9,14 +9,13 @@ export function useWAE(event: H3Event, query: Compilable) {
 
   const cfAccountId = event.context.cloudflare?.env?.NUXT_CF_ACCOUNT_ID || config.cfAccountId
   const cfApiToken = event.context.cloudflare?.env?.NUXT_CF_API_TOKEN || config.cfApiToken
-  console.log('useWAE', { cfAccountId, cfApiToken, config })
   if (!cfAccountId || !cfApiToken)
     return { data: [] }
 
   const compiledQuery = compileAnalyticsQuery(query)
 
-  // if (import.meta.dev)
-  console.info('useWAE', compiledQuery)
+  if (import.meta.dev)
+    console.info('useWAE', compiledQuery)
 
   return $fetch(`https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/analytics_engine/sql`, {
     method: 'POST',
