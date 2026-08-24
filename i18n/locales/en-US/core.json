@@ -11,7 +11,9 @@
     "edit": "Edit",
     "delete": "Delete",
     "delete_success": "Delete successful!",
-    "search": "Search"
+    "search": "Search",
+    "not_found": "Page not found",
+    "not_found_description": "Sorry, the page you're looking for doesn't exist."
   },
   "theme": {
     "toggle": "Toggle theme",

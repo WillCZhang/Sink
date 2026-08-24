@@ -11,7 +11,9 @@
     "edit": "编辑",
     "delete": "删除",
     "delete_success": "删除成功！",
-    "search": "搜索"
+    "search": "搜索",
+    "not_found": "页面未找到",
+    "not_found_description": "抱歉，您访问的页面不存在。"
   },
   "theme": {
     "toggle": "切换主题",

@@ -1,14 +1,44 @@
+<script setup lang="ts">
+import errorImage from './assets/images/404.svg?raw'
+</script>
+
 <template>
   <div
     class="
-      flex flex-col justify-center overflow-x-clip bg-background text-foreground
+      flex min-h-svh flex-col items-center justify-center gap-6 bg-background
+      px-6 py-16 text-foreground
     "
   >
-    <HomeHero />
-    <HomeLogos />
-    <HomeFeatures />
-    <HomeStats />
-    <HomeTestimonials />
-    <HomeCta />
+    <div
+      class="
+        w-full max-w-[500px]
+        [&_svg]:h-auto [&_svg]:w-full
+      "
+    >
+      <span class="contents" v-html="errorImage" />
+    </div>
+
+    <div class="flex flex-col items-center gap-2 text-center">
+      <h1 class="text-2xl font-medium">
+        {{ $t('common.not_found') }}
+      </h1>
+      <p class="max-w-sm text-pretty text-muted-foreground">
+        {{ $t('common.not_found_description') }}
+      </p>
+    </div>
+
+    <Button as-child>
+      <NuxtLink to="/dashboard">
+        {{ $t('dashboard.title') }}
+      </NuxtLink>
+    </Button>
   </div>
 </template>
+
+<style scoped>
+@media (prefers-reduced-motion: reduce) {
+  :deep(svg *) {
+    animation: none !important;
+  }
+}
+</style>

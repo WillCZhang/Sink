@@ -11,7 +11,9 @@
     "edit": "Chỉnh sửa",
     "delete": "Xóa",
     "delete_success": "Xóa thành công!",
-    "search": "Tìm kiếm"
+    "search": "Tìm kiếm",
+    "not_found": "Không tìm thấy trang",
+    "not_found_description": "Xin lỗi, trang bạn đang tìm kiếm không tồn tại."
   },
   "theme": {
     "toggle": "Chuyển đổi giao diện",
