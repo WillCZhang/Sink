@@ -3,6 +3,7 @@ import type { Compilable } from 'kysely'
 
 export function useWAE(event: H3Event, query: Compilable) {
   const { cfAccountId, cfApiToken } = useRuntimeConfig(event)
+  console.log('useWAE', { cfAccountId, cfApiToken })
   if (!cfAccountId || !cfApiToken)
     return { data: [] }
 
